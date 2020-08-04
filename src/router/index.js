@@ -355,8 +355,36 @@ export const asyncRouterMap = [
         component: () => import('@/views/ums/resource/categoryList'),
         meta: {title: '资源分类'},
         hidden: true
-      }
+      },
     ]
+  },
+  {
+    path:'/excel',
+    component: Layout,
+    redirect: '/ums/admin',
+    name: 'excel',
+    meta: {title: 'EXCEL', icon: 'order'},
+    children: [
+      {
+        path: 'excel-property',
+        name: 'excel-property',
+        component: () => import('@/views/excel/property/property'),
+        meta: {title: '财务报表', icon: 'order'}
+      },
+      {
+        path: 'excel-report',
+        name: 'excel-report',
+        component: () => import('@/views/excel/report/report'),
+        meta: {title: '产品报表', icon: 'order'}
+      },
+      {
+        path: 'article',
+        name: 'article',
+        component: () => import('@/views/excel/article/article'),
+        meta: {title: '文章管理'},
+        hidden: true
+      }
+      ]
   },
   {path: '*', redirect: '/404', hidden: true}
 ]
