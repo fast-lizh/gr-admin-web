@@ -58,8 +58,6 @@
        // console.log(this.content);
        // console.log(this.html);
         addArticle(this.title,this.html)
-
-        alert(mavonEditor)
         this.$message.success('提交成功，已打印至控制台！');
       }
     },
