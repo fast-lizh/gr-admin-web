@@ -1,6 +1,5 @@
 <template>
 
-
   <el-form :inline="true" :model="input" class="demo-form-inline" >
     <el-form-item >
       <el-input v-model="title" placeholder="文章标题" style="width: 600px" ></el-input>
@@ -55,9 +54,11 @@
       },
       // 提交
       submit(){
-       // console.log(this.content);
-       // console.log(this.html);
-        addArticle(this.title,this.html)
+        // console.log(this.content);
+        // console.log(this.html);
+        alert(this.$route.query.id)
+
+        addArticle(this.$route.query.id,this.title,this.html)
         this.$message.success('提交成功，已打印至控制台！');
       }
     },

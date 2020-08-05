@@ -1,8 +1,12 @@
 <template>
+
   <article>
     <div style="padding:20px" v-highlight>
       <h1 class="blog-title" v-text="title">{{title}}</h1>
       <!-- 用<mavon-editor>标签显示文章内容 -->
+
+      <el-button size="mini" class="btn-add" @click="back()">返回<i class="el-icon-arrow-left el-icon--right"></i>
+      </el-button>
       <mavon-editor v-html="Blog" style="padding:20px">
       </mavon-editor>
     </div>
@@ -33,7 +37,7 @@
         getFileContent(this.$route.query.id).then(response => {
 
           this.Blog = response.data.content,
-          this.title=response.data.docName
+            this.title=response.data.docName
         });
       }
     },

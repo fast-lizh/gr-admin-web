@@ -359,28 +359,28 @@ export const asyncRouterMap = [
     ]
   },
   {
-    path:'/excel',
+    path:'/memorandum',
     component: Layout,
-    redirect: '/ums/admin',
-    name: 'excel',
-    meta: {title: 'EXCEL', icon: 'order'},
+    redirect: '/memorandum/article-manage',
+    name: 'memorandum',
+    meta: {title: 'memorandum', icon: 'order'},
     children: [
       {
-        path: 'excel-property',
-        name: 'excel-property',
-        component: () => import('@/views/excel/property/property'),
-        meta: {title: '财务报表', icon: 'order'}
+        path: 'article-editor',
+        name: 'article-editor',
+        component: () => import('@/views/article/editor/editor'),
+        meta: {title: '文章编辑', icon: 'order'}
       },
       {
-        path: 'excel-report',
-        name: 'excel-report',
-        component: () => import('@/views/excel/report/report'),
-        meta: {title: '产品报表', icon: 'order'}
+        path: 'article-preview',
+        name: 'article-preview',
+        component: () => import('@/views/article/preview/preview'),
+        meta: {title: '文件预览', icon: 'order'}
       },
       {
-        path: 'article',
-        name: 'article',
-        component: () => import('@/views/excel/article/article'),
+        path: 'article-manage',
+        name: 'article-manage',
+        component: () => import('@/views/article/manage/manage'),
         meta: {title: '文章管理'},
         hidden: true
       }

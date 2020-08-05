@@ -1,10 +1,12 @@
 import request from '@/utils/request'
 
-export function addArticle(title, html) {
+// 发布文章
+export function addArticle(parentId,title, html) {
   return request({
     url: '/file/release',
     method: 'post',
     data: {
+      parentId,
       title,
       html
     }

@@ -2,8 +2,8 @@
   <div class="app-container">
     <el-card class="filter-container" shadow="never">
       <div>
-        <el-input v-model="title" placeholder="文章标题" style="width: 1150px"></el-input>
-        <el-button type="primary" @click="submit">搜索<i class="el-icon-search el-icon--right"></i></el-button>
+        <el-input v-model="file.searchName" placeholder="搜索" style="width: 1150px"></el-input>
+        <el-button type="primary" @click="search()">搜索<i class="el-icon-search el-icon--right"></i></el-button>
       </div>
     </el-card>
 
@@ -13,7 +13,7 @@
     <el-button size="mini" class="btn-add" @click="dialogVisible=true">添加<i
       class="el-icon-folder-add el-icon--right"></i></el-button>
 
-    <el-button size="mini" class="btn-add" @click="handleAdd()">发布<i class="el-icon-folder-add el-icon--right"></i>
+    <el-button  size="mini" class="btn-add" @click="handleAdd()">发布<i class="el-icon-folder-add el-icon--right"></i>
     </el-button>
 
     <el-dialog
@@ -72,22 +72,28 @@
       });
     },
     methods: {
+      search(){
+        getFile(this.file.searchName, this.file.parentId).then(response => {
+          this.tableData = response.data
+          //alert(response.data[0].type)
+        });
+      },
       handleAdd() {
-        this.$router.push({path: '/excel/excel-property'});
+        let parentId = this.arr[this.arr.length-1];
+        this.$router.push({path: '/memorandum/article-editor',query:{id:parentId}});
       },
       back(){
         this.arr.pop()
-       // alert(this.arr.length-1)
+        // alert(this.arr.length-1)
         getFile(this.file.searchName,this.arr[this.arr.length-1]).then(response => {
           this.tableData = response.data
           //alert(response.data[0].type)
         });
-        //this.index=0;
       },
       handleGetFile(parentId,type) {
         this.arr.push(parentId)
         if (0==type){
-          this.$router.push({path: '/excel/excel-report',query:{id:parentId}});
+          this.$router.push({path: '/memorandum/article-preview',query:{id:parentId}});
           //this.$router.push({path:'/home',query: {id:'1'}})
         }
         getFile(this.file.searchName, parentId).then(response => {
@@ -95,10 +101,15 @@
         });
       },
       handleAddFile() {
-        addFile(this.fileAdd.parentId,this.fileAdd.fileName,this.fileAdd.content).then(response => {
-          this.$router.go(0);
+        // alert(this.arr[this.arr.length-1])
+        addFile(this.arr[this.arr.length-1],this.fileAdd.fileName,this.fileAdd.content).then(response => {
+          getFile(this.file.searchName, this.arr[this.arr.length-1]).then(response => {
+            this.dialogVisible=false //关闭弹框
+            this.tableData = response.data // 加载新数据
+            this.fileAdd.fileName=null
+          });
         })
-      }
+      },
     }
   }
 </script>
