@@ -2,30 +2,92 @@
   <div class="app-container">
     <div class="address-layout">
       <el-row :gutter="20">
-        <el-col :span="6">
-          <div class="out-border">
-            <div class="layout-title">后台项目</div>
+        <el-col :span="6" style="text-align: center" >
+          <div class="out-border" >
+            <div class="layout-title">个人简历</div>
             <div class="color-main address-content">
-              <a href="https://github.com/macrozheng/mall">mall</a>
+                <!--<img :src="img_home_project" class="total-icon"  @click="drawer = true">-->
+                <img :src="img_home_project" class="total-icon"  @click="getResume()">
             </div>
           </div>
         </el-col>
-        <el-col :span="6">
+
+       <!-- <el-drawer
+          title="个人简历"
+          :visible.sync="drawer"
+          :direction="direction"
+          :before-close="handleClose"
+          size="30%">
+
+          &lt;!&ndash;<pdf
+            ref="pdf"
+            :src="pdfUrl"
+            :page="currentPage"
+          >
+
+          </pdf>&ndash;&gt;
+
+          <div class="pdf" v-show="fileType === 'pdf'">
+            <p class="arrow">
+              <span @click="changePdfPage(0)" class="turn" :class="{grey: currentPage==1}">Preview</span>
+              {{currentPage}} / {{pageCount}}
+
+              <span @click="changePdfPage(1)" class="turn" :class="{grey: currentPage==pageCount}">Next</span>
+            </p>
+            <pdf
+              :src="pdfUrl"
+            :page="currentPage"
+            @num-pages="pageCount=$event"
+            @page-loaded="currentPage=$event"
+            @loaded="loadPdfHandler">
+            </pdf>
+          </div>
+
+        </el-drawer>-->
+
+       <!-- <el-drawer
+          title="个人简历"
+          :visible.sync="drawer"
+          :with-header="false">
+          &lt;!&ndash;<span>我来啦!</span>&ndash;&gt;
+          <pdf
+            ref="pdf"
+            :src="pdfUrl">
+          </pdf>
+        </el-drawer>-->
+
+        <el-col :span="6" style="text-align: center">
           <div class="out-border">
-            <div class="layout-title">前端项目</div>
+            <div class="layout-title">GITHUB-WEB</div>
             <div class="color-main address-content">
-              <a href="https://github.com/macrozheng/mall-admin-web">mall-admin-web</a>
+              <a href="https://github.com/fast-lizh/gr-admin-web">
+                <img :src="img_home_github" class="total-icon">
+              </a>
             </div>
           </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="6" style="text-align: center">
           <div class="out-border">
-            <div class="layout-title">学习教程</div>
+            <div class="layout-title">网盘-ggvu</div>
             <div class="color-main address-content">
-              <a href="https://github.com/macrozheng/mall-learning">mall-learning</a>
+              <a href="https://pan.baidu.com/s/1BerGmQb4DO06tgNZXJCeFw">
+                <img :src="img_home_could" class="total-icon">
+              </a>
             </div>
           </div>
         </el-col>
+
+        <el-col :span="6" style="text-align: center">
+          <div class="out-border">
+            <div class="layout-title">知乎主页</div>
+            <div class="color-main address-content">
+              <a href="https://www.zhihu.com/people/lizhihe-81-83">
+                <img :src="img_home_zhihu" class="total-icon">
+              </a>
+            </div>
+          </div>
+        </el-col>
+
       </el-row>
     </div>
     <div class="total-layout">
@@ -51,23 +113,31 @@
             <div class="total-value">￥5000.00</div>
           </div>
         </el-col>
-        <!--<el-col :span="6">-->
-          <!--<div class="total-frame">-->
-            <!--<svg-icon icon-class="total-week" class="total-icon">-->
-            <!--</svg-icon>-->
-            <!--<div class="total-title">近7天销售总额</div>-->
-            <!--<div class="total-value">￥50000.00</div>-->
-          <!--</div>-->
-        <!--</el-col>-->
+
+        <el-col :span="6">
+          <div class="total-frame">
+            <img :src="img_home_week_amount" class="total-icon">
+            <div class="total-title">近7天销售总额</div>
+            <div class="total-value">￥50000.00</div>
+          </div>
+        </el-col>
+
+
+        <!--近7天销售总额-->
+
+        <!-- <el-col :span="6">
+           <div class="total-frame">
+             <svg-icon icon-class="total-week" class="total-icon">
+             </svg-icon>
+             <div class="total-title">近7天销售总额</div>
+             <div class="total-value">￥50000.00</div>
+           </div>
+         </el-col>-->
+
       </el-row>
     </div>
-    <el-card class="mine-layout">
-      <div style="text-align: center">
-        <img width="150px" height="150px" src="http://macro-oss.oss-cn-shenzhen.aliyuncs.com/mall/banner/qrcode_for_macrozheng_258.jpg">
-      </div>
-      <div style="text-align: center">mall全套学习教程连载中！</div>
-      <div style="text-align: center;margin-top: 5px"><span class="color-main">关注公号</span>，第一时间获取。</div>
-    </el-card>
+
+
     <div class="un-handle-layout">
       <div class="layout-title">待处理事务</div>
       <div class="un-handle-content">
@@ -242,15 +312,27 @@
       </el-row>
     </div>
   </div>
+
+
 </template>
 
 <script>
+
+  import pdf from 'vue-pdf'
+
   import {str2Date} from '@/utils/date';
   import img_home_order from '@/assets/images/home_order.png';
+  import img_home_github from '@/assets/images/github.svg';
+  import img_home_could from '@/assets/images/could.svg';
+  import img_home_zhihu from '@/assets/images/zhihu.svg';
+  import img_home_project from '@/assets/images/project.svg';
   import img_home_today_amount from '@/assets/images/home_today_amount.png';
   import img_home_yesterday_amount from '@/assets/images/home_yesterday_amount.png';
+  import img_home_week_amount from '@/assets/images/count.svg';
+
+
   const DATA_FROM_BACKEND = {
-    columns: ['date', 'orderCount','orderAmount'],
+    columns: ['date', 'orderCount', 'orderAmount'],
     rows: [
       {date: '2018-11-01', orderCount: 10, orderAmount: 1093},
       {date: '2018-11-02', orderCount: 20, orderAmount: 2230},
@@ -270,9 +352,20 @@
     ]
   };
   export default {
+    name: 'Pdf',
+    components: {
+      pdf
+    },
     name: 'home',
     data() {
       return {
+        drawer: false,
+        direction: 'rtl',
+        currentPage: 0, // pdf文件页码
+        pageCount: 0, // pdf文件总页数
+        fileType: 'pdf', // 文件类型
+        pdfUrl:"http://file.dakawengu.com/file/2018-05-29/20180527-tianfeng.pdf",
+
         pickerOptions: {
           shortcuts: [{
             text: '最近一周',
@@ -301,9 +394,10 @@
         orderCountDate: '',
         chartSettings: {
           xAxisType: 'time',
-          area:true,
-          axisSite: { right: ['orderAmount']},
-        labelMap: {'orderCount': '订单数量', 'orderAmount': '订单金额'}},
+          area: true,
+          axisSite: {right: ['orderAmount']},
+          labelMap: {'orderCount': '订单数量', 'orderAmount': '订单金额'}
+        },
         chartData: {
           columns: [],
           rows: []
@@ -311,39 +405,55 @@
         loading: false,
         dataEmpty: false,
         img_home_order,
+        img_home_github,
+        img_home_could,
+        img_home_zhihu,
+        img_home_project,
         img_home_today_amount,
-        img_home_yesterday_amount
+        img_home_yesterday_amount,
+        img_home_week_amount
       }
-    },
-    created(){
+    }
+    ,
+    created() {
       this.initOrderCountDate();
       this.getData();
-    },
-    methods:{
-      handleDateChange(){
-        this.getData();
+    }
+    ,
+    methods: {
+      getResume(){ //个人简历
+        this.$router.push({path: '/memorandum/article-resume'});
       },
-      initOrderCountDate(){
+      // pdf加载时
+      loadPdfHandler (e) {
+        this.currentPage = 1 // 加载的时候先加载第一页
+      },
+      handleDateChange() {
+        this.getData();
+      }
+      ,
+      initOrderCountDate() {
         let start = new Date();
         start.setFullYear(2018);
         start.setMonth(10);
         start.setDate(1);
         const end = new Date();
         end.setTime(start.getTime() + 1000 * 60 * 60 * 24 * 7);
-        this.orderCountDate=[start,end];
-      },
-      getData(){
+        this.orderCountDate = [start, end];
+      }
+      ,
+      getData() {
         setTimeout(() => {
           this.chartData = {
-            columns: ['date', 'orderCount','orderAmount'],
+            columns: ['date', 'orderCount', 'orderAmount'],
             rows: []
           };
-          for(let i=0;i<DATA_FROM_BACKEND.rows.length;i++){
-            let item=DATA_FROM_BACKEND.rows[i];
-            let currDate=str2Date(item.date);
-            let start=this.orderCountDate[0];
-            let end=this.orderCountDate[1];
-            if(currDate.getTime()>=start.getTime()&&currDate.getTime()<=end.getTime()){
+          for (let i = 0; i < DATA_FROM_BACKEND.rows.length; i++) {
+            let item = DATA_FROM_BACKEND.rows[i];
+            let currDate = str2Date(item.date);
+            let start = this.orderCountDate[0];
+            let end = this.orderCountDate[1];
+            if (currDate.getTime() >= start.getTime() && currDate.getTime() <= end.getTime()) {
               this.chartData.rows.push(item);
             }
           }
@@ -440,6 +550,7 @@
     margin-top: 20px;
     border: 1px solid #DCDFE6;
   }
+
   .mine-layout {
     position: absolute;
     right: 140px;
@@ -447,7 +558,8 @@
     width: 250px;
     height: 235px;
   }
-  .address-content{
+
+  .address-content {
     padding: 20px;
     font-size: 18px
   }

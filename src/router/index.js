@@ -369,19 +369,46 @@ export const asyncRouterMap = [
         path: 'article-editor',
         name: 'article-editor',
         component: () => import('@/views/article/editor/editor'),
-        meta: {title: '文章编辑', icon: 'order'}
+        meta: {title: '文章编辑', icon: 'order'},
+        hidden: true
       },
       {
         path: 'article-preview',
         name: 'article-preview',
         component: () => import('@/views/article/preview/preview'),
-        meta: {title: '文件预览', icon: 'order'}
+        meta: {title: '文件预览', icon: 'order'},
+        hidden: true
       },
       {
         path: 'article-manage',
         name: 'article-manage',
         component: () => import('@/views/article/manage/manage'),
         meta: {title: '文章管理'},
+      },
+      {
+        path: 'article-resume',
+        name: 'article-resume',
+        component: () => import('@/views/article/resume/resume'),
+        meta: {title: '个人简历'},
+        hidden: true
+      },
+      {
+        path: 'article-download',
+        name: 'article-download',
+        component: () => import('@/views/article/download/download'),
+        meta: {title: '软件下载'} //upload
+      },
+      {
+        path: 'article-upload',
+        name: 'article-upload',
+        component: () => import('@/views/article/upload/upload'),
+        meta: {title: '软件上传'}, //upload
+      },
+      {
+        path: 'add-category',
+        name: 'add-category',
+        component: () => import('@/views/article/upload/add/add-category'),
+        meta: {title: '添加分类'}, //upload
         hidden: true
       }
       ]
