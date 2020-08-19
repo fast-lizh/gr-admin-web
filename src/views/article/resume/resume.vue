@@ -1,31 +1,31 @@
 <template>
 
-    <!--<pdf
-      ref="pdf"
+  <!--<pdf
+    ref="pdf"
+    :src="pdfUrl"
+    :page="currentPage"
+  >
+
+  </pdf>-->
+
+  <div class="pdf" v-show="fileType === 'pdf'">
+    <p class="arrow">
+      <span @click="changePdfPage(0)" class="turn" :class="{grey: currentPage==1}"><img :src="img_pdf_previous"
+                                                                                        class="total-icon"></span>
+      {{currentPage}} / {{pageCount}}
+
+
+      <span @click="changePdfPage(1)" class="turn" :class="{grey: currentPage==pageCount}"> <img :src="img_pdf_next"
+                                                                                                 class="total-icon"></span>
+    </p>
+    <pdf
       :src="pdfUrl"
       :page="currentPage"
-    >
-
-    </pdf>-->
-
-    <div class="pdf" v-show="fileType === 'pdf'">
-      <p class="arrow">
-        <span @click="changePdfPage(0)" class="turn" :class="{grey: currentPage==1}"><img :src="img_pdf_previous" class="total-icon" ></span>
-        {{currentPage}} / {{pageCount}}
-
-
-        <span @click="changePdfPage(1)" class="turn" :class="{grey: currentPage==pageCount}" > <img :src="img_pdf_next" class="total-icon" ></span>
-      </p>
-      <pdf
-        :src="pdfUrl"
-        :page="currentPage"
-        @num-pages="pageCount=$event"
-        @page-loaded="currentPage=$event"
-        @loaded="loadPdfHandler">
-      </pdf>
-    </div>
-
-
+      @num-pages="pageCount=$event"
+      @page-loaded="currentPage=$event"
+      @loaded="loadPdfHandler">
+    </pdf>
+  </div>
 
 
 </template>
@@ -34,12 +34,13 @@
   import pdf from 'vue-pdf'
   import img_pdf_next from '@/assets/images/next.svg';
   import img_pdf_previous from '@/assets/images/previous.svg';
+  import {getDownload} from '@/api/resume';
 
   export default {
-   /* name: "resume",
-    components: {
-      pdf
-    },*/
+    /* name: "resume",
+     components: {
+       pdf
+     },*/
     name: 'pdf',
     components: {
       pdf
@@ -53,14 +54,19 @@
         pageCount: 0, // pdf文件总页数
         fileType: 'pdf', // 文件类型 http://39.108.12.213:81/group1/M00/00/00/rBrfdl8s8bKAQrUpAAJBYvsJ7aw489.pdf
         //pdfUrl: "http://file.dakawengu.com/file/2018-05-29/20180527-tianfeng.pdf",
-        pdfUrl: "http://39.108.12.213:81/group1/M00/00/00/rBrfdl8s8bKAQrUpAAJBYvsJ7aw489.pdf",
+        pdfUrl: "",
         img_pdf_next,
         img_pdf_previous,
       }
     },
     created() {
-      // 有时PDF文件地址会出现跨域的情况,这里最好处理一下
+      getDownload().then(result => {
+        this.pdfUrl = result.data.resumeUrl
+      })
       this.pdfUrl = pdf.createLoadingTask(this.pdfUrl)
+
+      alert(this.pdfUrl)
+
     },
     methods: {
 

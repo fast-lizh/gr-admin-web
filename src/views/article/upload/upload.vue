@@ -2,13 +2,23 @@
   <div class="app-container">
     <el-card class="operate-container" shadow="never">
       <i class="el-icon-tickets" style="margin-top: 5px"></i>
-      <span style="margin-top: 5px">数据列表</span>
+      <span style="margin-top: 5px">软件菜单</span>
       <el-button
         class="btn-add"
+        v-show="menuShow"
         @click="handleAddMenu()"
         size="mini">
-        添加
+        添加菜单
       </el-button>
+
+      <el-button
+        class="btn-add"
+        v-show="softwareShow"
+        @click="handleAddSoftware()"
+        size="mini">
+        上传软件
+      </el-button>
+
     </el-card>
     <div class="table-container">
       <el-table ref="menuTable"
@@ -19,30 +29,32 @@
           <template slot-scope="scope">{{scope.row.id}}</template>
         </el-table-column>
         <el-table-column label="菜单名称" align="center">
-          <template slot-scope="scope">{{scope.row.title}}</template>
+          <template slot-scope="scope">{{scope.row.menuName}}</template>
         </el-table-column>
         <el-table-column label="菜单级数" width="100" align="center">
           <template slot-scope="scope">{{scope.row.level | levelFilter}}</template>
         </el-table-column>
-        <el-table-column label="前端名称" align="center">
+        <!--<el-table-column label="前端名称" align="center">
           <template slot-scope="scope">{{scope.row.name}}</template>
-        </el-table-column>
+        </el-table-column>-->
         <el-table-column label="前端图标" width="100" align="center">
-          <template slot-scope="scope"><svg-icon :icon-class="scope.row.icon"></svg-icon></template>
+          <template slot-scope="scope"><img :src="scope.row.menuIconUrl" width="50" height="50"></template>
         </el-table-column>
-        <el-table-column label="是否显示" width="100" align="center">
-          <template slot-scope="scope">
-            <el-switch
-              @change="handleHiddenChange(scope.$index, scope.row)"
-              :active-value="0"
-              :inactive-value="1"
-              v-model="scope.row.hidden">
-            </el-switch>
-          </template>
-        </el-table-column>
-        <el-table-column label="排序" width="100" align="center">
+
+        <!-- <el-table-column label="是否显示" width="100" align="center">
+           <template slot-scope="scope">
+             <el-switch
+               @change="handleHiddenChange(scope.$index, scope.row)"
+               :active-value="0"
+               :inactive-value="1"
+               v-model="scope.row.hidden">
+             </el-switch>
+           </template>
+         </el-table-column>-->
+
+        <!--<el-table-column label="排序" width="100" align="center">
           <template slot-scope="scope">{{scope.row.sort }}</template>
-        </el-table-column>
+        </el-table-column>-->
         <el-table-column label="设置" width="120" align="center">
           <template slot-scope="scope">
             <el-button
@@ -85,7 +97,7 @@
 </template>
 
 <script>
-  import {fetchList,deleteMenu,updateMenu,updateHidden} from '@/api/menu'
+  import {fetchList, deleteMenu,} from '@/api/softwareMenu'
 
   export default {
     name: "menuList",
@@ -96,9 +108,11 @@
         listLoading: true,
         listQuery: {
           pageNum: 1,
-          pageSize: 5
+          pageSize: 10
         },
-        parentId: 0
+        parentId: 0,
+        menuShow: true, //软件菜单是否显示
+        softwareShow: false,//软件上传是否显示
       }
     },
     created() {
@@ -112,7 +126,7 @@
       }
     },
     methods: {
-      resetParentId(){
+      resetParentId() {
         this.listQuery.pageNum = 1;
         if (this.$route.query.parentId != null) {
           this.parentId = this.$route.query.parentId;
@@ -123,8 +137,18 @@
       handleAddMenu() {
         this.$router.push({path: '/memorandum/add-category'});
       },
+      handleAddSoftware() {
+        this.$router.push({path: '/memorandum/add-software', query: {"parentId": this.parentId}});
+      },
       getList() {
-        this.listLoading = true;
+        if (this.$route.query.parentId != undefined) {
+          this.parentId = this.$route.query.parentId
+        }
+        if (this.parentId != 0) {
+          this.softwareShow = true;
+          this.menuShow = false;
+        }
+
         fetchList(this.parentId, this.listQuery).then(response => {
           this.listLoading = false;
           this.list = response.data.list;
@@ -141,22 +165,29 @@
         this.getList();
       },
       handleHiddenChange(index, row) {
-        updateHidden(row.id,{hidden:row.hidden}).then(response=>{
+        /*updateHidden(row.id, {hidden: row.hidden}).then(response => {
           this.$message({
             message: '修改成功',
             type: 'success',
             duration: 1000
           });
-        });
+        });*/
       },
+      //查看下级
       handleShowNextLevel(index, row) {
-        this.$router.push({path: '/ums/menu', query: {parentId: row.id}})
+        this.$router.push({path: '/memorandum/article-upload', query: {parentId: row.id}})
       },
       handleUpdate(index, row) {
-        this.$router.push({path:'/ums/updateMenu',query:{id:row.id}});
+        if (row.level == 0) {//如果是菜单
+          this.$router.push({path: '/memorandum/add-category', query: {"id": row.id,"operation":"update"}});
+        }
+        if (row.level == 1) {//如果是软件
+          this.$router.push({path: '/memorandum/add-software', query: {"id": row.id,"operation":"update"}});
+        }
+        //this.$router.push({path: '/ums/updateMenu', query: {id: row.id}});
       },
       handleDelete(index, row) {
-        this.$confirm('是否要删除该菜单', '提示', {
+        this.$confirm('是否要删除该数据', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -167,7 +198,13 @@
               type: 'success',
               duration: 1000
             });
-            this.getList();
+            //重新加载
+            fetchList(row.parentId, this.listQuery).then(response => {
+              this.listLoading = false;
+              this.list = response.data.list;
+              this.total = response.data.total;
+            });
+
           });
         });
       }

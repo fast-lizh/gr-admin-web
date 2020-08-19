@@ -2,59 +2,34 @@
   <div class="app-container">
     <div class="address-layout">
       <el-row :gutter="20">
-        <el-col :span="6" style="text-align: center" >
-          <div class="out-border" >
+
+
+        <el-col :span="6" style="text-align: center">
+          <div class="out-border">
             <div class="layout-title">个人简历</div>
             <div class="color-main address-content">
-                <!--<img :src="img_home_project" class="total-icon"  @click="drawer = true">-->
-                <img :src="img_home_project" class="total-icon"  @click="getResume()">
+              <!--<img :src="img_home_project" class="total-icon"  @click="drawer = true">-->
+              <div>
+                <el-upload
+                  class="upload-demo"
+                  action="string"
+                  :on-preview="handlePreview"
+                  :show-file-list="true"
+                  :before-upload="beforeAvatarUpload"
+                  :http-request="handleAvatarSuccess"
+                >
+                  <el-button type="primary" icon="el-icon-edit" circle @click="updateResume()"></el-button>
+                </el-upload>
+
+                <el-button type="primary" icon="el-icon-document-copy" circle @click="getResume()"></el-button>
+              </div>
+
             </div>
           </div>
         </el-col>
 
-       <!-- <el-drawer
-          title="个人简历"
-          :visible.sync="drawer"
-          :direction="direction"
-          :before-close="handleClose"
-          size="30%">
 
-          &lt;!&ndash;<pdf
-            ref="pdf"
-            :src="pdfUrl"
-            :page="currentPage"
-          >
 
-          </pdf>&ndash;&gt;
-
-          <div class="pdf" v-show="fileType === 'pdf'">
-            <p class="arrow">
-              <span @click="changePdfPage(0)" class="turn" :class="{grey: currentPage==1}">Preview</span>
-              {{currentPage}} / {{pageCount}}
-
-              <span @click="changePdfPage(1)" class="turn" :class="{grey: currentPage==pageCount}">Next</span>
-            </p>
-            <pdf
-              :src="pdfUrl"
-            :page="currentPage"
-            @num-pages="pageCount=$event"
-            @page-loaded="currentPage=$event"
-            @loaded="loadPdfHandler">
-            </pdf>
-          </div>
-
-        </el-drawer>-->
-
-       <!-- <el-drawer
-          title="个人简历"
-          :visible.sync="drawer"
-          :with-header="false">
-          &lt;!&ndash;<span>我来啦!</span>&ndash;&gt;
-          <pdf
-            ref="pdf"
-            :src="pdfUrl">
-          </pdf>
-        </el-drawer>-->
 
         <el-col :span="6" style="text-align: center">
           <div class="out-border">
@@ -320,12 +295,16 @@
 
   import pdf from 'vue-pdf'
 
+  import {uploadIcon} from '@/api/softwareMenu';
+  import {add} from '@/api/resume';
   import {str2Date} from '@/utils/date';
   import img_home_order from '@/assets/images/home_order.png';
   import img_home_github from '@/assets/images/github.svg';
   import img_home_could from '@/assets/images/could.svg';
   import img_home_zhihu from '@/assets/images/zhihu.svg';
   import img_home_project from '@/assets/images/project.svg';
+  import img_home_select from '@/assets/images/select.svg';
+  import img_home_update from '@/assets/images/update.svg';
   import img_home_today_amount from '@/assets/images/home_today_amount.png';
   import img_home_yesterday_amount from '@/assets/images/home_yesterday_amount.png';
   import img_home_week_amount from '@/assets/images/count.svg';
@@ -359,12 +338,13 @@
     name: 'home',
     data() {
       return {
+        visible: false,
         drawer: false,
         direction: 'rtl',
         currentPage: 0, // pdf文件页码
         pageCount: 0, // pdf文件总页数
         fileType: 'pdf', // 文件类型
-        pdfUrl:"http://file.dakawengu.com/file/2018-05-29/20180527-tianfeng.pdf",
+        pdfUrl: "http://file.dakawengu.com/file/2018-05-29/20180527-tianfeng.pdf",
 
         pickerOptions: {
           shortcuts: [{
@@ -409,6 +389,8 @@
         img_home_could,
         img_home_zhihu,
         img_home_project,
+        img_home_select,
+        img_home_update,
         img_home_today_amount,
         img_home_yesterday_amount,
         img_home_week_amount
@@ -421,11 +403,41 @@
     }
     ,
     methods: {
-      getResume(){ //个人简历
+
+      beforeAvatarUpload(file) {
+        const isJPG = file.type === 'pdf';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是pdf格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
+      },
+      handleAvatarSuccess(params) {
+        let fd = new FormData();
+        fd.append("file", params.file);
+        uploadIcon(fd).then(res => {
+          if (res.code == 200) {
+            add(res.data.fileName, res.data.path).then(result => {
+              if (result.code == 200) {
+                this.$router.push({path: '/memorandum/article-resume'});
+              }
+            })
+          }
+        })
+          .catch(err => {
+            alert("上传失败，请重新上传");
+          });
+      },
+      getResume() { //获取个人简历
         this.$router.push({path: '/memorandum/article-resume'});
       },
+      updateResume() { //修改个人简历
+      },
       // pdf加载时
-      loadPdfHandler (e) {
+      loadPdfHandler(e) {
         this.currentPage = 1 // 加载的时候先加载第一页
       },
       handleDateChange() {

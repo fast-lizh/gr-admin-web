@@ -4,150 +4,169 @@
              :rules="rules"
              ref="menuFrom"
              label-width="150px">
-      <el-form-item label="菜单名称：" prop="title">
-        <el-input v-model="menu.title"></el-input>
-      </el-form-item>
-      <el-form-item label="上级菜单：">
-        <el-select v-model="menu.parentId"
-                   placeholder="请选择菜单">
-          <el-option
-            v-for="item in selectMenuList"
-            :key="item.id"
-            :label="item.title"
-            :value="item.id">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="前端名称：" prop="name">
+      <el-form-item label="菜单名称：" prop="name">
         <el-input v-model="menu.name"></el-input>
       </el-form-item>
-      <el-form-item label="前端图标：" prop="icon">
-        <el-input v-model="menu.icon" style="width: 80%"></el-input>
-        <svg-icon style="margin-left: 8px" :icon-class="menu.icon"></svg-icon>
+
+      <el-form-item label="菜单ICON：" prop="imageUrl">
+        <el-upload
+          class="avatar-uploader"
+          ref="upload"
+          name="file"
+          action="string"
+          accept="image/gif,image/jpeg,image/jpg,image/png,image/svg"
+          :show-file-list="true"
+          :before-upload="beforeAvatarUpload"
+          :http-request="handleAvatarSuccess"
+        >
+          <img v-if="this.menu.imageUrl" :src="this.menu.imageUrl" v-model="this.menu.imageUrl" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
       </el-form-item>
-      <el-form-item label="是否显示：">
-        <el-radio-group v-model="menu.hidden">
-          <el-radio :label="0">是</el-radio>
-          <el-radio :label="1">否</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="排序：">
-        <el-input v-model="menu.sort"></el-input>
-      </el-form-item>
+
       <el-form-item>
-        <el-button type="primary" @click="onSubmit('menuFrom')">提交</el-button>
-        <el-button v-if="!isEdit" @click="resetForm('menuFrom')">重置</el-button>
+        <el-button type="primary" @click="createMenu('menuFrom')">提交</el-button>
       </el-form-item>
+
     </el-form>
   </el-card>
 </template>
 
 <script>
-  import {fetchList, createMenu, updateMenu, getMenu} from '@/api/menu';
+  import {softwareCreateMenu, softwareUpdateMenu, uploadIcon} from '@/api/softwareMenu';
+  import {getDownload} from '@/api/download';
 
-  const defaultMenu = {
-    title: '',
-    parentId: 0,
-    name: '',
-    icon: '',
-    hidden: 0,
-    sort: 0
-  };
+
   export default {
-    name: "MenuDetail",
-    props: {
-      isEdit: {
-        type: Boolean,
-        default: false
-      }
-    },
     data() {
       return {
-        menu: Object.assign({}, defaultMenu),
-        selectMenuList: [],
+        menu: {
+          name: '',
+          imageUrl: ''
+        },
         rules: {
-          title: [
-            {required: true, message: '请输入菜单名称', trigger: 'blur'},
-            {min: 2, max: 140, message: '长度在 2 到 140 个字符', trigger: 'blur'}
-          ],
           name: [
-            {required: true, message: '请输入前端名称', trigger: 'blur'},
+            {required: true, message: '请输入软件名称', trigger: 'blur'},
             {min: 2, max: 140, message: '长度在 2 到 140 个字符', trigger: 'blur'}
           ],
-          icon: [
-            {required: true, message: '请输入前端图标', trigger: 'blur'},
+          imageUrl: [
+            {required: true, message: '请上传软件图标', trigger: 'blur'},
             {min: 2, max: 140, message: '长度在 2 到 140 个字符', trigger: 'blur'}
           ]
         }
       }
     },
     created() {
-      if (this.isEdit) {
-        getMenu(this.$route.query.id).then(response => {
-          this.menu = response.data;
+      if (this.$route.query.id != undefined) {
+        getDownload(this.$route.query.id).then(response => {
+          this.menu.name = response.data[0].menuName;
+          this.menu.imageUrl = response.data[0].menuIconUrl;
         });
-      } else {
-        this.menu = Object.assign({}, defaultMenu);
       }
-      this.getSelectMenuList();
     },
     methods: {
-      getSelectMenuList() {
-        fetchList(0, {pageSize: 100, pageNum: 1}).then(response => {
-          this.selectMenuList = response.data.list;
-          this.selectMenuList.unshift({id: 0, title: '无上级菜单'});
-        });
-      },
-      onSubmit(formName) {
+      createMenu(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            this.$confirm('是否提交数据', '提示', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning'
-            }).then(() => {
-              if (this.isEdit) {
-                updateMenu(this.$route.query.id, this.menu).then(response => {
+            if ("update" == this.$route.query.operation) {
+              softwareUpdateMenu(this.$route.query.id, this.menu.name, this.menu.imageUrl).then(response => {
+                if (response.code == 200) {
                   this.$message({
-                    message: '修改成功',
-                    type: 'success',
-                    duration: 1000
+                    message: response.message,
+                    center: true,
+                    type: 'success'
                   });
-                  this.$router.back();
-                });
-              } else {
-                createMenu(this.menu).then(response => {
-                  this.$refs[formName].resetFields();
-                  this.resetForm(formName);
-                  this.$message({
-                    message: '提交成功',
-                    type: 'success',
-                    duration: 1000
-                  });
-                  this.$router.back();
-                });
-              }
+                  this.$router.push({path: '/memorandum/article-upload'})
+                }
+              });
+            } else {
+              softwareCreateMenu(this.menu.name, this.menu.imageUrl).then(response => {
+                if (response.code == 200) {
+                  this.$router.push({path: '/memorandum/article-upload'})
+                }
+              });
+            }
+            this.$message({
+              message: '验证成功',
+              type: 'success',
+              center: true,
+              duration: 1000
             });
-
           } else {
             this.$message({
               message: '验证失败',
               type: 'error',
+              center: true,
               duration: 1000
             });
             return false;
           }
         });
+
       },
-      resetForm(formName) {
-        this.$refs[formName].resetFields();
-        this.menu = Object.assign({}, defaultMenu);
-        this.getSelectMenuList();
+      /*---------------图片上传*/
+      handleAvatarSuccess(params) {
+        //this.imageUrl = URL.createObjectURL(file.raw);
+        //alert(this.imageUrl)
+
+        let fd = new FormData();
+        fd.append("file", params.file);
+        uploadIcon(fd)
+          .then(res => {
+            if (res.code == 200) {
+              this.menu.imageUrl = res.data.path
+            }
+          })
+          .catch(err => {
+            alert("上传失败，请重新上传");
+          });
       },
+      beforeAvatarUpload(file) {
+        const isJPG = file.type === 'image/svg+xml';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是svg格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
+      },
+      uploadFile(file) {
+        uploadIcon(file)
+      }
     }
   }
 </script>
 
-<style scoped>
+<style>
+
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
 
 </style>
