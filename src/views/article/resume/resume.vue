@@ -16,8 +16,12 @@
 
 
       <span @click="changePdfPage(1)" class="turn" :class="{grey: currentPage==pageCount}"> <img :src="img_pdf_next"
+
+
                                                                                                  class="total-icon"></span>
     </p>
+
+
     <pdf
       :src="pdfUrl"
       :page="currentPage"
